@@ -1,30 +1,15 @@
 use rand::{thread_rng, Rng};
 use piston_window::*;
 use piston_window::types::Color;
+use crate::playground::Playground;
 use crate::snake::{Snake, Direction};
+use crate::food::Food;
 use crate::draw::*;
 
 
-const FROG_COLOR: Color = [0.5, 1.0, 0.5, 1.0];
-const BONUS_COLOR: Color = [0.0, 1.0, 1.0, 1.0];
 const GAMEOVER_COLOR: Color = [0.9, 0.0, 0.0, 0.5];
 const RESTART_DELAY: f64 = 1.0;
 
-
-pub struct Playground {
-    width: u32,
-    height: u32,
-    color: Color,
-    border_color: Color,
-    border_width: u32,
-}
-
-pub struct Food {
-    block: Block,
-    color: Color,
-    calories: u32,
-    disappear_after: Option<f64>,
-}
 
 pub struct Game {
     playground: Playground,
@@ -45,75 +30,12 @@ pub enum State {
 }
 
 
-impl Playground {
-
-    pub fn new(width: u32, height: u32, color: Color,
-            border_color: Color, border_width: u32) 
-            -> Playground {
-        Playground {
-            width,
-            height,
-            color,
-            border_color,
-            border_width,
-        }
-    }
-
-    pub fn draw(&self, context: &Context, graphics: &mut G2d) {
-        draw_rectangle(
-            Position (0, 0), 
-            self.width, 
-            self.height, 
-            self.border_color, 
-            context, 
-            graphics
-        );
-        draw_rectangle(
-            Position (self.border_width, self.border_width), 
-            self.width - self.border_width, 
-            self.height - self.border_width, 
-            self.color, 
-            context, 
-            graphics
-        );
-    }
-
-}
-
-
-impl Food {
-
-    pub fn new_frog(block: Block, color: Color) -> Food {
-        Food {
-            block,
-            color,
-            calories: 10,
-            disappear_after: None,
-        }
-    }
-
-    pub fn new_bonus(block: Block, color: Color) -> Food {
-        Food {
-            block,
-            color,
-            calories: 50,
-            disappear_after: Some(30.0),
-        }
-    }
-
-    pub fn draw(&self, context: &Context, graphics: &mut G2d) {
-        self.block.draw(self.color, context, graphics);
-    }
-
-}
-
-
 impl Game {
 
     pub fn new(playground: Playground) -> Game {
         let ref_playground = &playground;
-        let width =  ref_playground.width;
-        let height = ref_playground.height;
+        let width =  ref_playground.get_width();
+        let height = ref_playground.get_height();
         Game {
             playground: playground,
             score: 0,
@@ -145,7 +67,7 @@ impl Game {
 
     pub fn draw(&self, context: &Context, graphics: &mut G2d) {
         if let State::HitWalls = self.state {
-            self.playground.border_color = [8.0, 0.0, 0.0, 1.0];
+            self.playground.set_border_color([8.0, 0.0, 0.0, 1.0]);
             self.state = State::GameOver;
         } else if let State::BiteItself = self.state {
             self.snake.set_color([8.0, 0.0, 0.0, 1.0]);
@@ -162,8 +84,8 @@ impl Game {
         if let State::GameOver = self.state {
             draw_rectangle(
                 Position (0, 0), 
-                self.playground.width, 
-                self.playground.height, 
+                self.playground.get_width(), 
+                self.playground.get_height(), 
                 GAMEOVER_COLOR, 
                 context, 
                 graphics);

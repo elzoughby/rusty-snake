@@ -2,7 +2,9 @@ extern crate rand;
 extern crate piston_window;
 
 mod game;
+mod playground;
 mod snake;
+mod food;
 mod draw;
 
 use piston_window::*;
