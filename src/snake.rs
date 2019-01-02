@@ -1,6 +1,7 @@
 use std::collections::LinkedList;
 use piston_window::types::Color;
 use piston_window::{Context, G2d};
+use crate::playground::Playground;
 use crate::draw::{Block, Shape, Position};
 
 
@@ -10,8 +11,10 @@ const SNAKE_COLOR: Color = [0.00, 0.80, 0.00, 1.0];
 pub struct Snake {
     head: Block,
     body: LinkedList<Block>,
+    prev_tail: Option<Block>,
     direction: Direction,
     color: Color,
+    eatings: u32,
 }
 
 #[derive(PartialEq)]
@@ -57,8 +60,10 @@ impl Snake {
                 Shape::Circle,
             ),
             body: body,
+            prev_tail: None,
             direction: Direction::Right,
             color: SNAKE_COLOR,
+            eatings: 0,
         }
     }
 
@@ -86,7 +91,14 @@ impl Snake {
         };
         self.head.set_position(new_position);
         self.body.push_front(new_block);
-        self.body.pop_back();
+        self.prev_tail = self.body.pop_back();
+    }
+
+    pub fn eat(&mut self) {
+        let tail = self.prev_tail.clone().unwrap();
+        self.body.push_back(tail);
+        self.prev_tail = None;
+        self.eatings += 1;
     }
 
     pub fn bite_itself(&self) -> bool {
@@ -96,6 +108,33 @@ impl Snake {
             }
         }
         false
+    }
+
+    pub fn hit_walls_of(&self, playground: &Playground) -> bool {
+        let width = playground.get_width();
+        let height = playground.get_height();
+        let wall_width = playground.get_border_width();
+        let Position (column, row) = *self.get_head_position();
+
+        let hit_top = (row == (wall_width - 1));
+        let hit_left = (column == (wall_width - 1));
+        let hit_bottom = (row == (height - wall_width));
+        let hit_right = (column == (width - wall_width));
+
+        hit_top || hit_bottom || hit_left || hit_right
+    }
+
+    pub fn on_position(&self, position: &Position) -> bool {
+        for block in self.body.iter() {
+            if position == block.get_position() {
+                return true;
+            }
+        }
+        self.get_head_position() == position
+    }
+
+    pub fn get_head_position(&self) -> &Position {
+        self.head.get_position()
     }
 
     pub fn get_direction(&self) -> &Direction {

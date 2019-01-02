@@ -51,8 +51,8 @@ impl Playground {
         );
         draw_rectangle(
             Position (self.border_width, self.border_width), 
-            self.width - self.border_width, 
-            self.height - self.border_width, 
+            self.width - (self.border_width * 2), 
+            self.height - (self.border_width * 2), 
             self.color, 
             context, 
             graphics
@@ -67,12 +67,22 @@ impl Playground {
         self.height
     }
 
+    pub fn get_size(&self) -> [f64; 2] {
+        Position::new(self.width, self.height)
+            .to_coord()
+            .as_array()
+    }
+
     pub fn set_color(&mut self, color: Color) {
         self.color = color;
     }
 
     pub fn set_border_color(&mut self, color: Color) {
         self.border_color = color;
+    }
+
+    pub fn get_border_width(&self) -> u32 {
+        self.border_width
     }
 
     pub fn set_border_width(&mut self, width: u32) {

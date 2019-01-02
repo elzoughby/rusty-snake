@@ -4,24 +4,32 @@ use piston_window::types::Color;
 
 const BLOCK_SIZE: f64 = 10.0;
 
-#[derive(PartialEq)]
-pub struct Position (pub u32, pub u32);
 
-#[derive(PartialEq)]
-pub struct Coord (pub f64, pub f64);
-
+#[derive(Clone)]
 pub struct Block {
     position: Position,
     shape: Shape,
 }
 
+#[derive(Clone)]
 pub enum Shape {
     Square,
     Circle,
     Triangle,
 }
 
+#[derive(Clone, PartialEq)]
+pub struct Position (pub u32, pub u32);
+
+#[derive(Clone, PartialEq)]
+pub struct Coord (pub f64, pub f64);
+
+
 impl Position {
+
+    pub fn new(columns: u32, rows: u32) -> Position {
+        Position (columns, rows)
+    }
 
     pub fn to_coord(&self) -> Coord {
         let x = (self.0 as f64) * BLOCK_SIZE;
@@ -35,7 +43,12 @@ impl Position {
 
 }
 
+
 impl Coord {
+
+    pub fn new(x:f64, y:f64) -> Coord {
+        Coord (x, y)
+    }
 
     pub fn to_position(&self) -> Position {
         let column = (self.0 / BLOCK_SIZE) as u32;
@@ -44,11 +57,12 @@ impl Coord {
     }
 
     pub fn as_array(&self) -> [f64; 2] {
-        let Coord (x, y) = self;
-        [*x, *y]
+        let Coord (x, y) = *self;
+        [x, y]
     }
 
 }
+
 
 impl Block {
 
@@ -101,6 +115,7 @@ impl Block {
     }
 
 }
+
 
 
 pub fn draw_rectangle(position: Position, width: u32, height: u32, 
