@@ -2,10 +2,10 @@ use std::collections::LinkedList;
 use piston_window::types::Color;
 use piston_window::{Context, G2d};
 use crate::playground::Playground;
-use crate::draw::{Block, Shape, Position};
+use crate::draw::{Block, Shape, Position, Direction, draw_eyes};
 
 
-const SNAKE_COLOR: Color = [0.00, 0.80, 0.00, 1.0];
+const SNAKE_COLOR: Color = [0.19, 0.19, 0.18, 1.0];
 
 
 pub struct Snake {
@@ -15,28 +15,6 @@ pub struct Snake {
     direction: Direction,
     color: Color,
     eatings: u32,
-}
-
-#[derive(PartialEq)]
-pub enum Direction {
-    Up,
-    Down,
-    Left,
-    Right,
-}
-
-
-impl Direction {
-
-    pub fn opposite(&self) -> Direction {
-        match self {
-            Direction::Up => Direction::Down,
-            Direction::Down => Direction::Up,
-            Direction::Left => Direction::Right,
-            Direction::Right => Direction::Left,
-        }
-    }
-
 }
 
 
@@ -68,10 +46,11 @@ impl Snake {
     }
 
     pub fn draw(&self, context: &Context, graphics: &mut G2d) {
-        self.head.draw(SNAKE_COLOR, context, graphics);
         for block in self.body.iter() {
             block.draw(SNAKE_COLOR, context, graphics);
         }
+        self.head.draw(SNAKE_COLOR, context, graphics);
+        draw_eyes(&self.head, &self.direction, context, graphics);
     }
 
     pub fn step(&mut self, dir: Option<Direction>) {

@@ -3,8 +3,8 @@ use piston_window::*;
 use piston_window::types::Color;
 use crate::food::Food;
 use crate::playground::Playground;
-use crate::snake::{Snake, Direction};
-use crate::draw::{Position, draw_rectangle};
+use crate::snake::{Snake};
+use crate::draw::{Position, Direction, draw_rectangle};
 
 
 const GAMEOVER_COLOR: Color = [0.9, 0.0, 0.0, 0.5];
@@ -90,7 +90,10 @@ impl Game {
         self.waiting_time += delta_time;
         self.update_state();
         if let State::HitWalls = self.state {
-            self.playground.set_border_color([8.0, 0.0, 0.0, 1.0]);
+            let border_color = self.playground.get_border_color1();
+            let hit_color = self.playground.get_border_color2();
+            self.playground.set_border_color1(hit_color);
+            self.playground.set_border_color2(border_color);
             self.state = State::GameOver;
         } else if let State::BiteItself = self.state {
             self.snake.set_color([8.0, 0.0, 0.0, 1.0]);

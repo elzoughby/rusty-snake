@@ -3,9 +3,9 @@ use piston_window::types::Color;
 use crate::draw::{Block, Shape, Position};
 
 
-const FROG_COLOR: Color = [0.5, 1.0, 0.5, 1.0];
+const FROG_COLOR: Color = [0.17, 0.51, 0.08, 1.0];
 const BONUS_COLOR: Color = [0.0, 1.0, 1.0, 1.0];
-const FROG_SHAPE: Shape = Shape::Triangle;
+const FROG_SHAPE: Shape = Shape::Square;
 const BONUS_SHAPE: Shape = Shape::Circle;
 
 #[derive(Clone)]

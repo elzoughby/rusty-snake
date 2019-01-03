@@ -17,7 +17,7 @@ const WHITE_COLOR: Color = [1.0, 1.0, 1.0, 1.0];
 
 
 fn main() {
-    let columns = 25;
+    let columns = 35;
     let rows = 25;
     let playground = Playground::new(columns, rows);
     let size = playground.get_size();

@@ -2,7 +2,8 @@ use piston_window::*;
 use piston_window::types::Color;
 
 
-const BLOCK_SIZE: f64 = 10.0;
+const BLOCK_SIZE: f64 = 12.0;
+const WHITE_COLOR: Color = [1.0, 1.0, 1.0, 1.0];
 
 
 #[derive(Clone)]
@@ -18,11 +19,34 @@ pub enum Shape {
     Triangle,
 }
 
+
 #[derive(Clone, PartialEq)]
 pub struct Position (pub u32, pub u32);
 
 #[derive(Clone, PartialEq)]
 pub struct Coord (pub f64, pub f64);
+
+#[derive(Clone, PartialEq)]
+pub enum Direction {
+    Up,
+    Down,
+    Left,
+    Right,
+}
+
+
+impl Direction {
+
+    pub fn opposite(&self) -> Direction {
+        match self {
+            Direction::Up => Direction::Down,
+            Direction::Down => Direction::Up,
+            Direction::Left => Direction::Right,
+            Direction::Right => Direction::Left,
+        }
+    }
+
+}
 
 
 impl Position {
@@ -127,5 +151,29 @@ pub fn draw_rectangle(position: Position, width: u32, height: u32,
         context.transform,
         graphics
     );
+}
+
+pub fn draw_eyes(head: &Block, direction: &Direction, 
+            context: &Context, graphics: &mut G2d) {
+    let Coord (x, y) = head.position.to_coord();
+    let fifth = BLOCK_SIZE/5.0;
+    let (eye1_x, eye1_y, eye2_x, eye2_y) = match direction {
+        Direction::Up =>
+            (x+fifth, y+fifth, x+fifth*3.0, y+fifth),
+        Direction::Down =>
+            (x+fifth, y+fifth*3.0, x+fifth*3.0, y+fifth*3.0),
+        Direction::Left =>
+            (x+fifth, y+fifth, x+fifth, y+fifth*3.0),
+        Direction::Right =>
+            (x+fifth*3.0, y+fifth, x+fifth*3.0, y+fifth*3.0),
+    };
+    ellipse(WHITE_COLOR, 
+            [eye1_x, eye1_y, fifth, fifth],
+            context.transform,
+            graphics);
+    ellipse(WHITE_COLOR, 
+            [eye2_x, eye2_y, fifth, fifth],
+            context.transform,
+            graphics);
 }
 
