@@ -56,8 +56,8 @@ impl Position {
     }
 
     pub fn to_coord(&self) -> Coord {
-        let x = (self.0 as f64) * BLOCK_SIZE;
-        let y = (self.1 as f64) * BLOCK_SIZE;
+        let x = f64::from(self.0) * BLOCK_SIZE;
+        let y = f64::from(self.1) * BLOCK_SIZE;
         Coord (x, y)
     }
 
@@ -142,12 +142,13 @@ impl Block {
 
 
 
-pub fn draw_rectangle(position: Position, width: u32, height: u32, 
+pub fn draw_rectangle(position: &Position, width: u32, height: u32, 
             color: Color, context: &Context, graphics: &mut G2d) {
     let Coord (x, y) = position.to_coord();
     rectangle(
         color, 
-        [x, y, (width as f64 * BLOCK_SIZE), (height as f64 * BLOCK_SIZE)], 
+        [x, y, (f64::from(width) * BLOCK_SIZE), 
+            (f64::from(height) * BLOCK_SIZE)], 
         context.transform,
         graphics
     );

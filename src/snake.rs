@@ -20,21 +20,21 @@ pub struct Snake {
 
 impl Snake {
 
-    pub fn new(position: Position) -> Snake {
+    pub fn new(position: &Position) -> Snake {
         let mut body: LinkedList<Block> = LinkedList::new();
         body.push_back(Block::new(
-            position.shifted_by(3, 0),
+            position.shifted_by(1, 0),
             Shape::Square,
         ));
 
         body.push_back(Block::new(
-            position.shifted_by(2, 0),
+            position.shifted_by(0, 0),
             Shape::Square,
         ));
 
         Snake {
             head: Block::new( 
-                position.shifted_by(4, 0),
+                position.shifted_by(2, 0),
                 Shape::Circle,
             ),
             body: body,
@@ -95,10 +95,10 @@ impl Snake {
         let wall_width = playground.get_border_width();
         let Position (column, row) = *self.get_head_position();
 
-        let hit_top = (row == (wall_width - 1));
-        let hit_left = (column == (wall_width - 1));
-        let hit_bottom = (row == (height - wall_width));
-        let hit_right = (column == (width - wall_width));
+        let hit_top = row == (wall_width - 1);
+        let hit_left = column == (wall_width - 1);
+        let hit_bottom = row == (height - wall_width);
+        let hit_right = column == (width - wall_width);
 
         hit_top || hit_bottom || hit_left || hit_right
     }

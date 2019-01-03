@@ -25,8 +25,6 @@ pub struct Game {
 
 pub enum State {
     Running,
-    HitWalls,
-    BiteItself,
     GameOver,
 }
 
@@ -40,7 +38,7 @@ impl Game {
         Game {
             playground: playground,
             score: 0,
-            snake: Snake::new(Position (3, 3)),
+            snake: Snake::new(&Position (3, 3)),
             frog: Some(Food::new_frog(Position (width - 4, height - 4))),
             bonus: None,
             move_delay: MOVE_DELAY,
@@ -77,7 +75,7 @@ impl Game {
         self.snake.draw(context, graphics);
         if let State::GameOver = self.state {
             draw_rectangle(
-                Position (0, 0), 
+                &Position (0, 0), 
                 self.playground.get_width(), 
                 self.playground.get_height(), 
                 GAMEOVER_COLOR, 
@@ -89,17 +87,8 @@ impl Game {
     pub fn update(&mut self, delta_time: f64) {
         self.waiting_time += delta_time;
         self.update_state();
-        if let State::HitWalls = self.state {
-            let border_color = self.playground.get_border_color1();
-            let hit_color = self.playground.get_border_color2();
-            self.playground.set_border_color1(hit_color);
-            self.playground.set_border_color2(border_color);
-            self.state = State::GameOver;
-        } else if let State::BiteItself = self.state {
-            self.snake.set_color([8.0, 0.0, 0.0, 1.0]);
-            self.state = State::GameOver;
-        }
         if let State::GameOver = self.state {
+            //self.snake.set_color([9.0, 0.0, 0.0, 1.0]);
             if self.waiting_time > RESTART_DELAY {
                 self.restart();
             }
@@ -136,10 +125,9 @@ impl Game {
             return;
         } 
         
-        self.state = if self.snake.bite_itself() {
-                State::BiteItself
-            } else if self.snake.hit_walls_of(&self.playground) {
-                State::HitWalls
+        self.state = if self.snake.bite_itself() ||
+            self.snake.hit_walls_of(&self.playground) {
+                State::GameOver
             } else {
                 State::Running
             };
@@ -154,7 +142,7 @@ impl Game {
     }
 
     fn restart(&mut self) {
-        self.snake = Snake::new(Position (3, 3));
+        self.snake = Snake::new(&Position (3, 3));
         self.state = State::Running;
         self.score = 0;
         self.waiting_time = 0.0;
