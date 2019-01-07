@@ -4,7 +4,7 @@ use piston_window::types::Color;
 use crate::food::Food;
 use crate::playground::Playground;
 use crate::snake::{Snake};
-use crate::draw::{Position, Direction, draw_rectangle};
+use crate::draw::{Position, Direction, draw_rectangle, draw_text};
 
 
 const GAMEOVER_COLOR: Color = [0.9, 0.0, 0.0, 0.5];
@@ -64,7 +64,7 @@ impl Game {
         }
     }
 
-    pub fn draw(&self, context: &Context, graphics: &mut G2d) {
+    pub fn draw(&self, factory: GfxFactory, context: &Context, graphics: &mut G2d) {
         self.playground.draw(context, graphics);
         if let Some(food) = &self.frog {
             food.draw(context, graphics);
@@ -82,6 +82,14 @@ impl Game {
                 context, 
                 graphics);
         }
+        draw_text(
+            &self.score.to_string(), 
+            &Position (17, 1), 
+            [1.0, 1.0, 1.0, 1.0], 
+            11, 
+            factory, 
+            context, 
+            graphics);
     }
 
     pub fn update(&mut self, delta_time: f64) {

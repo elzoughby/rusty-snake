@@ -1,3 +1,4 @@
+use std::path::Path;
 use piston_window::*;
 use piston_window::types::Color;
 
@@ -152,6 +153,20 @@ pub fn draw_rectangle(position: &Position, width: u32, height: u32,
         context.transform,
         graphics
     );
+}
+
+pub fn draw_text(text: &str, position: &Position, color: Color, size: u32,
+            factory: GfxFactory, context: &Context, graphics: &mut G2d) {
+    let Coord (x, y) = position.to_coord();
+    let font = "./assets/ExoSemiBold.ttf";
+    let mut glyphs = Glyphs::new(font, factory, TextureSettings::new()).unwrap();
+    piston_window::text(
+        color,
+        size,
+        text,
+        &mut glyphs,
+        context.transform.trans(x, y),
+        graphics).unwrap();
 }
 
 pub fn draw_eyes(head: &Block, direction: &Direction, 

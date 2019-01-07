@@ -23,7 +23,7 @@ impl Food {
         Food {
             block: Block::new(position, FROG_SHAPE),
             color: FROG_COLOR,
-            calories: 10,
+            calories: 2,
             disappear_after: None,
         }
     }
@@ -32,7 +32,7 @@ impl Food {
         Food {
             block: Block::new(position, BONUS_SHAPE),
             color: BONUS_COLOR,
-            calories: 50,
+            calories: 10,
             disappear_after: Some(10.0),
         }
     }

@@ -29,12 +29,13 @@ fn main() {
         });
     let mut game = Game::new(playground);
     while let Some(event) = window.next() {
+        let factory = window.factory.clone();
         if let Some(Button::Keyboard(key)) = event.press_args() {
             game.key_pressed(key);
         }
         window.draw_2d(&event, |context, graphics| {
             clear(WHITE_COLOR, graphics);
-            game.draw(&context, graphics);
+            game.draw(factory, &context, graphics);
         });
         event.update(|arg| {
             game.update(arg.dt)
