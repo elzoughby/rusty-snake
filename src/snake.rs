@@ -1,17 +1,19 @@
 use std::collections::LinkedList;
 use piston_window::types::Color;
-use piston_window::{Context, G2d};
+use piston_window::{GfxFactory, Context, G2d};
 use crate::playground::Playground;
 use crate::draw::{Block, Shape, Position, Direction, draw_eyes};
 
 
 const SNAKE_COLOR: Color = [0.19, 0.19, 0.18, 1.0];
+const SNAKE_BODY_SHAPE: Shape = Shape::Square;
+const SNAKE_HEAD_SHAPE: Shape = Shape::Circle;
 
 
 pub struct Snake {
     head: Block,
     body: LinkedList<Block>,
-    prev_tail: Option<Block>,
+    prev_tail: Position,
     direction: Direction,
     color: Color,
     eatings: u32,
@@ -24,32 +26,33 @@ impl Snake {
         let mut body: LinkedList<Block> = LinkedList::new();
         body.push_back(Block::new(
             position.shifted_by(1, 0),
-            Shape::Square,
+            SNAKE_BODY_SHAPE,
         ));
 
         body.push_back(Block::new(
             position.shifted_by(0, 0),
-            Shape::Square,
+            SNAKE_BODY_SHAPE,
         ));
 
         Snake {
             head: Block::new( 
                 position.shifted_by(2, 0),
-                Shape::Circle,
+                SNAKE_HEAD_SHAPE,
             ),
             body: body,
-            prev_tail: None,
+            prev_tail: position.shifted_by(1, 0),
             direction: Direction::Right,
             color: SNAKE_COLOR,
             eatings: 0,
         }
     }
 
-    pub fn draw(&self, context: &Context, graphics: &mut G2d) {
+    pub fn draw(&self, factory: &mut GfxFactory, context: &Context, 
+                graphics: &mut G2d) {
         for block in self.body.iter() {
-            block.draw(SNAKE_COLOR, context, graphics);
+            block.draw(SNAKE_COLOR, factory, context, graphics);
         }
-        self.head.draw(SNAKE_COLOR, context, graphics);
+        self.head.draw(SNAKE_COLOR, factory, context, graphics);
         draw_eyes(&self.head, &self.direction, context, graphics);
     }
 
@@ -58,25 +61,24 @@ impl Snake {
             self.direction = direction;
         }
 
-        let last_pos = self.head.get_position();
-        let new_block = Block::new(
-            Position (last_pos.0, last_pos.1), 
-            Shape::Square);
-        let new_position = match self.direction {
-            Direction::Up => last_pos.shifted_by(0, -1),
-            Direction::Down => last_pos.shifted_by(0, 1),
-            Direction::Left => last_pos.shifted_by(-1, 0),
-            Direction::Right => last_pos.shifted_by(1, 0),
+        let last_head_pos = self.head.get_position().clone();
+        let new_head_pos = match self.direction {
+            Direction::Up => last_head_pos.shifted_by(0, -1),
+            Direction::Down => last_head_pos.shifted_by(0, 1),
+            Direction::Left => last_head_pos.shifted_by(-1, 0),
+            Direction::Right => last_head_pos.shifted_by(1, 0),
         };
-        self.head.set_position(new_position);
+        self.head.set_position(new_head_pos);
+        let mut new_block = self.body.pop_back().unwrap();
+        self.prev_tail = new_block.get_position().clone();
+        new_block.set_position(last_head_pos);
         self.body.push_front(new_block);
-        self.prev_tail = self.body.pop_back();
     }
 
     pub fn eat(&mut self) {
-        let tail = self.prev_tail.clone().unwrap();
-        self.body.push_back(tail);
-        self.prev_tail = None;
+        let tail_pos = self.prev_tail.clone();
+        let new_block = Block::new(tail_pos, SNAKE_BODY_SHAPE);
+        self.body.push_back(new_block);
         self.eatings += 1;
     }
 
@@ -120,12 +122,13 @@ impl Snake {
         &self.direction
     }
 
-    pub fn get_color(&self) -> &Color {
-        &self.color
-    }
-
+    #[allow(dead_code)]
     pub fn set_color(&mut self, color: Color) {
         self.color = color;
+    }
+
+    pub fn get_eatings(&self) -> u32 {
+        self.eatings
     }
 
 }

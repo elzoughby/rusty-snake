@@ -1,4 +1,4 @@
-use piston_window::{Context, G2d};
+use piston_window::{GfxFactory, Context, G2d};
 use piston_window::types::Color;
 use crate::draw::{Position, draw_rectangle};
 
@@ -39,7 +39,7 @@ impl Playground {
         }
     }
 
-    pub fn draw(&self, context: &Context, graphics: &mut G2d) {
+    pub fn draw(&self, _factory: &mut GfxFactory, context: &Context, graphics: &mut G2d) {
         draw_rectangle(
             &Position (0, 0), 
             self.width, 
@@ -64,12 +64,6 @@ impl Playground {
 
     pub fn get_height(&self) -> u32 {
         self.height
-    }
-
-    pub fn get_size(&self) -> [f64; 2] {
-        Position::new(self.width, self.height)
-            .to_coord()
-            .as_array()
     }
 
     pub fn get_border_width(&self) -> u32 {

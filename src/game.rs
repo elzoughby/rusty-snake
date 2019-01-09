@@ -7,9 +7,12 @@ use crate::snake::{Snake};
 use crate::draw::{Position, Direction, draw_rectangle, draw_text};
 
 
-const GAMEOVER_COLOR: Color = [0.9, 0.0, 0.0, 0.5];
-const RESTART_DELAY: f64 = 2.0;
-const MOVE_DELAY: f64 = 0.2;
+const GAMEOVER_COLOR: Color = [0.0, 0.0, 0.0, 0.90];
+const WHITE_COLOR: Color = [1.0, 1.0, 1.0, 1.0];
+const BLACK_COLOR: Color = [0.0, 0.0, 0.0, 1.0];
+const SCORE_FONT_SIZE: u32 = 12;
+const GAMEOVER_FONT_SIZE: u32 = 20;
+const MOVE_DELAY: f64 = 0.24;
 
 
 pub struct Game {
@@ -21,6 +24,8 @@ pub struct Game {
     move_delay: f64,
     state: State,
     waiting_time: f64,
+    bonus_time: f64,
+    worth_bonus: bool,
 }
 
 pub enum State {
@@ -31,19 +36,63 @@ pub enum State {
 
 impl Game {
 
-    pub fn new(playground: Playground) -> Game {
-        let ref_playground = &playground;
-        let width =  ref_playground.get_width();
-        let height = ref_playground.get_height();
+    pub fn new(width: u32, height: u32) -> Game {
         Game {
-            playground: playground,
+            playground: Playground::new(width, height),
             score: 0,
             snake: Snake::new(&Position (3, 3)),
-            frog: Some(Food::new_frog(Position (width - 4, height - 4))),
+            frog: None,
             bonus: None,
             move_delay: MOVE_DELAY,
             state: State::Running,
             waiting_time: 0.0,
+            bonus_time: 0.0,
+            worth_bonus: false,
+        }
+    }
+
+    pub fn draw(&self, factory: &mut GfxFactory, 
+            context: &Context, graphics: &mut G2d) {
+        self.playground.draw(factory, context, graphics);
+        if let Some(food) = &self.frog {
+            food.draw(factory, context, graphics);
+        }
+        if let Some(food) = &self.bonus {
+            food.draw(factory, context, graphics);
+        }
+        self.snake.draw(factory, context, graphics);
+        draw_rectangle(
+            &Position (0, self.playground.get_height()),
+            self.playground.get_width(),
+            2,
+            [0.80, 0.30, 0.30, 1.0], //border color
+            context,
+            graphics);
+        draw_text(
+            &format!("Score: {}", &self.score), 
+            &Position (2, self.playground.get_height()+1), 
+            BLACK_COLOR, 
+            SCORE_FONT_SIZE, 
+            factory.clone(), 
+            context, 
+            graphics);
+
+        if let State::GameOver = self.state {
+            draw_rectangle(
+                &Position (0, 0), 
+                self.playground.get_width(), 
+                self.playground.get_height()+2, 
+                GAMEOVER_COLOR, 
+                context, 
+                graphics);
+            draw_text(
+                "Game Over", 
+                &Position (13, 12), 
+                WHITE_COLOR, 
+                GAMEOVER_FONT_SIZE, 
+                factory.clone(), 
+                context, 
+                graphics);
         }
     }
 
@@ -57,58 +106,53 @@ impl Game {
                 _ => None,
             };
             if let Some(direction) = &dir {
-                if *direction != self.snake.get_direction().opposite() {
+                let snake_direction = self.snake.get_direction();
+                if direction != snake_direction &&
+                        *direction != snake_direction.opposite() {
                     self.update_snake(dir);
                 }
             }
+        } else if let Key::Return = key {
+            self.restart();
         }
-    }
-
-    pub fn draw(&self, factory: GfxFactory, context: &Context, graphics: &mut G2d) {
-        self.playground.draw(context, graphics);
-        if let Some(food) = &self.frog {
-            food.draw(context, graphics);
-        }
-        if let Some(food) = &self.bonus {
-            food.draw(context, graphics);
-        }
-        self.snake.draw(context, graphics);
-        if let State::GameOver = self.state {
-            draw_rectangle(
-                &Position (0, 0), 
-                self.playground.get_width(), 
-                self.playground.get_height(), 
-                GAMEOVER_COLOR, 
-                context, 
-                graphics);
-        }
-        draw_text(
-            &self.score.to_string(), 
-            &Position (17, 1), 
-            [1.0, 1.0, 1.0, 1.0], 
-            11, 
-            factory, 
-            context, 
-            graphics);
     }
 
     pub fn update(&mut self, delta_time: f64) {
         self.waiting_time += delta_time;
-        self.update_state();
+        self.bonus_time += delta_time;
         if let State::GameOver = self.state {
-            //self.snake.set_color([9.0, 0.0, 0.0, 1.0]);
-            if self.waiting_time > RESTART_DELAY {
-                self.restart();
-            }
             return;
+        } else if self.snake.bite_itself() ||
+                self.snake.hit_walls_of(&self.playground) {
+            self.state = State::GameOver;
         }
         if self.frog.is_none() {
             let position = self.get_random_position();
             self.frog = Some(Food::new_frog(position));
         }
+        if self.bonus.is_none() {
+            let eatings = self.snake.get_eatings();
+            if eatings%5 == 0 && self.worth_bonus {
+                let position = self.get_random_position();
+                self.bonus = Some(Food::new_bonus(position));
+                self.bonus_time = 0.0;
+            }
+        } else {
+            let bonus = self.bonus.as_ref().unwrap();
+            if self.bonus_time > bonus.get_disappear_after().unwrap() {
+                self.bonus = None;
+                self.worth_bonus = false;
+            }
+        }
         if self.waiting_time > self.move_delay {
             self.update_snake(None);
         }
+    }
+
+    fn update_snake(&mut self, dir: Option<Direction>) {
+        self.snake.step(dir);
+        self.try_eating();
+        self.waiting_time = 0.0;
     }
 
     fn try_eating(&mut self) {
@@ -117,6 +161,7 @@ impl Game {
                 self.snake.eat();
                 self.score += food.get_calories();
                 self.frog = None;
+                self.worth_bonus = true;
             }
         } 
         if let Some(food) = &self.bonus {
@@ -124,37 +169,23 @@ impl Game {
                 self.snake.eat();
                 self.score += food.get_calories();
                 self.bonus = None;
+                // increase game speed
+                if self.move_delay > 0.0 {
+                    self.move_delay -= 0.03;
+                }
             }
         }
-    }
-
-    fn update_state(&mut self) {
-        if let State::GameOver = self.state {
-            return;
-        } 
-        
-        self.state = if self.snake.bite_itself() ||
-            self.snake.hit_walls_of(&self.playground) {
-                State::GameOver
-            } else {
-                State::Running
-            };
-    }
-
-    fn update_snake(&mut self, dir: Option<Direction>) {
-        if let State::Running = self.state {
-            self.snake.step(dir);
-            self.try_eating();
-        }
-        self.waiting_time = 0.0;
     }
 
     fn restart(&mut self) {
         self.snake = Snake::new(&Position (3, 3));
         self.state = State::Running;
-        self.score = 0;
+        self.move_delay = MOVE_DELAY;
         self.waiting_time = 0.0;
-        self.frog = Some(Food::new_frog(self.get_random_position()));
+        self.worth_bonus = false;
+        self.frog = None;
+        self.bonus = None;
+        self.score = 0;
     }
 
     fn get_random_position(&self) -> Position {
@@ -162,23 +193,29 @@ impl Game {
         let border = self.playground.get_border_width();
         let width = self.playground.get_width();
         let height = self.playground.get_height();
-        //let frog = self.frog.clone();
-        //let bonus = self.bonus.clone();
-        //let has_frog = !frog.is_none();
-        //let has_bonus = !bonus.is_none();
+        let has_frog = self.frog.is_some();
+        let has_bonus = self.bonus.is_some();
         let mut column = rng.gen_range(border, width - border - 1);
         let mut row = rng.gen_range(border, height - border - 1);
         let mut new_pos = Position (column, row);
 
         while self.snake.on_position(&new_pos) 
-                //|| (has_frog && frog.unwrap().get_position()  == &new_pos) 
-                //||(has_bonus && bonus.unwrap().get_position() == &new_pos) 
+                || (has_frog && self.frog.as_ref().unwrap().on_position(&new_pos)) 
+                || (has_bonus && self.bonus.as_ref().unwrap().on_position(&new_pos)) 
         {
             column = rng.gen_range(border, width - border - 1);
             row = rng.gen_range(border, height - border - 1);
             new_pos = Position (column, row);
         }
         new_pos
+    }
+
+    pub fn get_size(&self) -> [f64; 2] {
+        let width = self.playground.get_width();
+        let height = self.playground.get_height() + 2;
+        Position::new(width, height)
+            .to_coord()
+            .as_array()
     }
 
 }

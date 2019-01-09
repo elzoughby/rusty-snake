@@ -5,6 +5,6 @@ authors = ["Ahmed Elzoughby <gs_elzoughby@yahoo.com>"]
 edition = "2018"
 
 [dependencies]
-rand = "0.6.1"
+rand = "0.6.4"
 find_folder = "0.3.0"
 piston_window = "0.85.0"

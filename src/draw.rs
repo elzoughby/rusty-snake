@@ -1,4 +1,3 @@
-use std::path::Path;
 use piston_window::*;
 use piston_window::types::Color;
 
@@ -7,27 +6,27 @@ const BLOCK_SIZE: f64 = 12.0;
 const WHITE_COLOR: Color = [1.0, 1.0, 1.0, 1.0];
 
 
-#[derive(Clone)]
 pub struct Block {
     position: Position,
     shape: Shape,
 }
 
-#[derive(Clone)]
+#[allow(dead_code)]
 pub enum Shape {
     Square,
     Circle,
     Triangle,
+    Image(String),
 }
 
 
 #[derive(Clone, PartialEq)]
 pub struct Position (pub u32, pub u32);
 
-#[derive(Clone, PartialEq)]
+#[derive(PartialEq)]
 pub struct Coord (pub f64, pub f64);
 
-#[derive(Clone, PartialEq)]
+#[derive(PartialEq)]
 pub enum Direction {
     Up,
     Down,
@@ -63,7 +62,9 @@ impl Position {
     }
 
     pub fn shifted_by(&self, columns: i32, rows: i32,) -> Position {
-        Position ((self.0 as i32 + columns) as u32, (self.1 as i32 + rows) as u32)
+        Position::new(
+            (self.0 as i32 + columns) as u32, 
+            (self.1 as i32 + rows) as u32)
     }
 
 }
@@ -71,10 +72,12 @@ impl Position {
 
 impl Coord {
 
+    #[allow(dead_code)]
     pub fn new(x:f64, y:f64) -> Coord {
         Coord (x, y)
     }
 
+    #[allow(dead_code)]
     pub fn to_position(&self) -> Position {
         let column = (self.0 / BLOCK_SIZE) as u32;
         let row = (self.1 / BLOCK_SIZE) as u32;
@@ -98,9 +101,10 @@ impl Block {
         }
     }
 
-    pub fn draw(&self, color: Color, context: &Context, graphics: &mut G2d) {
+    pub fn draw(&self, color: Color, factory: &mut GfxFactory, 
+                    context: &Context, graphics: &mut G2d) {
         let Coord (x, y) = self.position.to_coord();
-        match self.shape {
+        match &self.shape {
             Shape::Square => rectangle(
                 color, 
                 [x, y, BLOCK_SIZE, BLOCK_SIZE], 
@@ -120,6 +124,12 @@ impl Block {
                 ], 
                 context.transform,
                 graphics),
+            Shape::Image(path) => {
+                let image   = Image::new().rect([x, y, BLOCK_SIZE, BLOCK_SIZE]);
+                let texture = Texture::from_path(factory, path, Flip::None,
+                    &TextureSettings::new()).unwrap();
+                image.draw(&texture, &DrawState::default(), context.transform, graphics);
+            },
         }
     }
 
@@ -131,10 +141,12 @@ impl Block {
         self.position = position;
     }
 
+    #[allow(dead_code)]
     pub fn get_shape(&self) -> &Shape {
         &self.shape
     }
 
+    #[allow(dead_code)]
     pub fn set_shape(&mut self, shape: Shape) {
         self.shape = shape;
     }
@@ -158,7 +170,7 @@ pub fn draw_rectangle(position: &Position, width: u32, height: u32,
 pub fn draw_text(text: &str, position: &Position, color: Color, size: u32,
             factory: GfxFactory, context: &Context, graphics: &mut G2d) {
     let Coord (x, y) = position.to_coord();
-    let font = "./assets/ExoSemiBold.ttf";
+    let font = "./assets/ExoExtraBold.ttf";
     let mut glyphs = Glyphs::new(font, factory, TextureSettings::new()).unwrap();
     piston_window::text(
         color,
