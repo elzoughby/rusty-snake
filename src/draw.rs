@@ -1,5 +1,7 @@
+use std::path::{Path, PathBuf};
 use piston_window::*;
 use piston_window::types::Color;
+use find_folder::Search;
 
 
 const BLOCK_SIZE: f64 = 12.0;
@@ -126,8 +128,8 @@ impl Block {
                 graphics),
             Shape::Image(path) => {
                 let image   = Image::new().rect([x, y, BLOCK_SIZE, BLOCK_SIZE]);
-                let texture = Texture::from_path(factory, path, Flip::None,
-                    &TextureSettings::new()).unwrap();
+                let texture = Texture::from_path(factory, find_asset(path),
+                        Flip::None, &TextureSettings::new()).unwrap();
                 image.draw(&texture, &DrawState::default(), context.transform, graphics);
             },
         }
@@ -170,7 +172,7 @@ pub fn draw_rectangle(position: &Position, width: u32, height: u32,
 pub fn draw_text(text: &str, position: &Position, color: Color, size: u32,
             factory: GfxFactory, context: &Context, graphics: &mut G2d) {
     let Coord (x, y) = position.to_coord();
-    let font = "./assets/ExoExtraBold.ttf";
+    let font = find_asset("ExoExtraBold.ttf");
     let mut glyphs = Glyphs::new(font, factory, TextureSettings::new()).unwrap();
     piston_window::text(
         color,
@@ -203,5 +205,17 @@ pub fn draw_eyes(head: &Block, direction: &Direction,
             [eye2_x, eye2_y, fifth, fifth],
             context.transform,
             graphics);
+}
+
+
+
+fn find_asset<P: AsRef<Path>>(asset: P) -> PathBuf {
+    let mut exe_folder = std::env::current_exe()
+            .expect("Couldn't capture the executable path");
+    exe_folder.pop(); // Remove the executable's name
+    let resource_path = Search::KidsThenParents(2, 2)
+            .of(exe_folder).for_folder("assets")
+            .expect("Couldn't find the assets folder");
+    resource_path.join(asset)
 }
 

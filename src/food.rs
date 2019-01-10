@@ -6,8 +6,8 @@ use crate::draw::{Block, Shape, Position};
 const FROG_COLOR: Color = [0.17, 0.51, 0.08, 1.0];
 const BONUS_COLOR: Color = [0.0, 1.0, 1.0, 1.0];
 const BONUS_DISAPPEAR_TIME: f64 = 5.0;
-const FROG_IMAGE_PATH: &str = "./assets/Frog.png";
-const BONUS_IMAGE_PATH: &str = "./assets/Mouse.png";
+const FROG_IMAGE: &str = "Frog.png";
+const BONUS_IMAGE: &str = "Mouse.png";
 
 
 pub struct Food {
@@ -21,7 +21,7 @@ pub struct Food {
 impl Food {
 
     pub fn new_frog(position: Position) -> Food {
-        let shape = Shape::Image(String::from(FROG_IMAGE_PATH));
+        let shape = Shape::Image(String::from(FROG_IMAGE));
         Food {
             block: Block::new(position, shape),
             color: FROG_COLOR,
@@ -31,7 +31,7 @@ impl Food {
     }
 
     pub fn new_bonus(position: Position) -> Food {
-        let shape = Shape::Image(String::from(BONUS_IMAGE_PATH));
+        let shape = Shape::Image(String::from(BONUS_IMAGE));
         Food {
             block: Block::new(position, shape),
             color: BONUS_COLOR,

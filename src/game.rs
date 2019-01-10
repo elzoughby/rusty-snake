@@ -12,7 +12,7 @@ const WHITE_COLOR: Color = [1.0, 1.0, 1.0, 1.0];
 const BLACK_COLOR: Color = [0.0, 0.0, 0.0, 1.0];
 const SCORE_FONT_SIZE: u32 = 12;
 const GAMEOVER_FONT_SIZE: u32 = 20;
-const MOVE_DELAY: f64 = 0.24;
+const MOVE_DELAY: f64 = 0.300; //300ms
 
 
 pub struct Game {
@@ -171,7 +171,7 @@ impl Game {
                 self.bonus = None;
                 // increase game speed
                 if self.move_delay > 0.0 {
-                    self.move_delay -= 0.03;
+                    self.move_delay -= 0.02;
                 }
             }
         }
