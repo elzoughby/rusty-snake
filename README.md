@@ -1,4 +1,4 @@
-#Rusty Snake Game
+# Rusty Snake Game
 
 The classic snake game built with ***[Rust](https://www.rust-lang.org/) programming language*** using [*Piston*](https://www.piston.rs/) game engine.
 
@@ -29,6 +29,7 @@ The classic snake game built with ***[Rust](https://www.rust-lang.org/) programm
   ```bash
   cargo build --release
   ```
+
 
 
 
