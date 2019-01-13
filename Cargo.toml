@@ -1,8 +1,17 @@
 [package]
 name = "rusty_snake"
+description = "The classic snake game written in rust"
 version = "0.1.0"
 authors = ["Ahmed Elzoughby <gs_elzoughby@yahoo.com>"]
 edition = "2018"
+license = "Apache-2.0/MIT"
+readme = "README.md"
+categories = ["Games"]
+keywords = ["rust", "snake", "game", "piston"]
+homepage = "https://github.com/elzoughby/rusty-snake"
+repository = "https://github.com/elzoughby/rusty-snake.git"
+exclude = ["assets/*"]
+
 
 [dependencies]
 rand = "0.6.4"

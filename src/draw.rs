@@ -128,7 +128,7 @@ impl Block {
                 graphics),
             Shape::Image(path) => {
                 let image   = Image::new().rect([x, y, BLOCK_SIZE, BLOCK_SIZE]);
-                let texture = Texture::from_path(factory, find_asset(path),
+                let texture = Texture::from_path(factory, find_resource(path),
                         Flip::None, &TextureSettings::new()).unwrap();
                 image.draw(&texture, &DrawState::default(), context.transform, graphics);
             },
@@ -172,7 +172,7 @@ pub fn draw_rectangle(position: &Position, width: u32, height: u32,
 pub fn draw_text(text: &str, position: &Position, color: Color, size: u32,
             factory: GfxFactory, context: &Context, graphics: &mut G2d) {
     let Coord (x, y) = position.to_coord();
-    let font = find_asset("ExoExtraBold.ttf");
+    let font = find_resource("ExoExtraBold.ttf");
     let mut glyphs = Glyphs::new(font, factory, TextureSettings::new()).unwrap();
     piston_window::text(
         color,
@@ -209,13 +209,13 @@ pub fn draw_eyes(head: &Block, direction: &Direction,
 
 
 
-fn find_asset<P: AsRef<Path>>(asset: P) -> PathBuf {
+fn find_resource<P: AsRef<Path>>(asset: P) -> PathBuf {
     let mut exe_folder = std::env::current_exe()
             .expect("Couldn't capture the executable path");
-    exe_folder.pop(); // Remove the executable's name
+    exe_folder.pop(); // Remove the executable name
     let resource_path = Search::KidsThenParents(2, 2)
-            .of(exe_folder).for_folder("assets")
-            .expect("Couldn't find the assets folder");
+            .of(exe_folder).for_folder("resources")
+            .expect("Couldn't find the resources folder");
     resource_path.join(asset)
 }
 

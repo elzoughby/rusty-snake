@@ -9,10 +9,9 @@ use crate::draw::{Position, Direction, draw_rectangle, draw_text};
 
 const GAMEOVER_COLOR: Color = [0.0, 0.0, 0.0, 0.90];
 const WHITE_COLOR: Color = [1.0, 1.0, 1.0, 1.0];
-const BLACK_COLOR: Color = [0.0, 0.0, 0.0, 1.0];
 const SCORE_FONT_SIZE: u32 = 12;
 const GAMEOVER_FONT_SIZE: u32 = 20;
-const MOVE_DELAY: f64 = 0.300; //300ms
+const MOVE_DELAY: f64 = 0.3; //300ms
 
 
 pub struct Game {
@@ -71,7 +70,7 @@ impl Game {
         draw_text(
             &format!("Score: {}", &self.score), 
             &Position (2, self.playground.get_height()+1), 
-            BLACK_COLOR, 
+            WHITE_COLOR, 
             SCORE_FONT_SIZE, 
             factory.clone(), 
             context, 
