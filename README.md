@@ -2,37 +2,30 @@
 
 The classic snake game built with ***[Rust](https://www.rust-lang.org/) programming language*** using [*Piston*](https://www.piston.rs/) game engine.
 
-
-
 ## Screenshots
 
-
-
-![Demo](assets/RustySnake.gif)
-
-
+![Demo](assets/demo.gif)
 
 ## How to run
 
+To build the game, you need to have *Rust 1.31* or higher installed in your machine with the MSVC Build Tools or MinGW for windows, GCC for linux or Xcode Tools for macOS.
 
+### Prerequisites
 
-- To run the debug binary:
+- Rustc
+- Cargo
+
+### To run the debug binary
 
   ```bash
   cargo run
   ```
 
-
-
-- To build the release binary:
+### To build the release binary
 
   ```bash
   cargo build --release
   ```
-
-
-
-
 
 ## License
 

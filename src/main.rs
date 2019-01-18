@@ -1,21 +1,15 @@
-mod game;
-mod playground;
-mod snake;
-mod food;
-mod draw;
-
 use piston_window::*;
 use piston_window::types::Color;
-use crate::game::Game;
+use snake::game::Game;
 
 
 const WHITE_COLOR: Color = [1.0, 1.0, 1.0, 1.0];
+const FROG_COLOR: Color = [0.17, 0.51, 0.08, 1.0];
+const BONUS_COLOR: Color = [0.0, 1.0, 1.0, 1.0];
 
 
 fn main() {
-    let columns = 35;
-    let rows = 25;
-    let mut game = Game::new(columns, rows);
+    let mut game = Game::default();
     let size = game.get_size();
     let mut window: PistonWindow = 
         WindowSettings::new("Rusty Snake", size)

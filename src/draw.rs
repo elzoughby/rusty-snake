@@ -14,10 +14,11 @@ pub struct Block {
 }
 
 #[allow(dead_code)]
+#[derive(Clone)]
 pub enum Shape {
-    Square,
-    Circle,
-    Triangle,
+    Square(Color),
+    Circle(Color),
+    Triangle(Color),
     Image(String),
 }
 
@@ -28,7 +29,7 @@ pub struct Position (pub u32, pub u32);
 #[derive(PartialEq)]
 pub struct Coord (pub f64, pub f64);
 
-#[derive(PartialEq)]
+#[derive(Clone, PartialEq)]
 pub enum Direction {
     Up,
     Down,
@@ -103,22 +104,22 @@ impl Block {
         }
     }
 
-    pub fn draw(&self, color: Color, factory: &mut GfxFactory, 
+    pub fn draw(&self, factory: &mut GfxFactory, 
                     context: &Context, graphics: &mut G2d) {
         let Coord (x, y) = self.position.to_coord();
         match &self.shape {
-            Shape::Square => rectangle(
-                color, 
+            Shape::Square(color) => rectangle(
+                *color, 
                 [x, y, BLOCK_SIZE, BLOCK_SIZE], 
                 context.transform,
                 graphics),
-            Shape::Circle => ellipse(
-                color, 
+            Shape::Circle(color) => ellipse(
+                *color, 
                 [x, y, BLOCK_SIZE, BLOCK_SIZE],
                 context.transform,
                 graphics),
-            Shape::Triangle => polygon(
-                color, 
+            Shape::Triangle(color) => polygon(
+                *color, 
                 &[
                     self.position.shifted_by(1, 0).to_coord().as_array(), 
                     self.position.shifted_by(0, 1).to_coord().as_array(), 

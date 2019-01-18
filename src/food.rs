@@ -1,10 +1,7 @@
 use piston_window::{GfxFactory,Context, G2d};
-use piston_window::types::Color;
 use crate::draw::{Block, Shape, Position};
 
 
-const FROG_COLOR: Color = [0.17, 0.51, 0.08, 1.0];
-const BONUS_COLOR: Color = [0.0, 1.0, 1.0, 1.0];
 const BONUS_DISAPPEAR_TIME: f64 = 5.0;
 const FROG_IMAGE: &str = "Frog.png";
 const BONUS_IMAGE: &str = "Mouse.png";
@@ -12,7 +9,6 @@ const BONUS_IMAGE: &str = "Mouse.png";
 
 pub struct Food {
     block: Block,
-    color: Color,
     calories: u32,
     disappear_after: Option<f64>,
 }
@@ -20,28 +16,29 @@ pub struct Food {
 
 impl Food {
 
-    pub fn new_frog(position: Position) -> Food {
+    pub fn new(shape: Shape, calories: u32, 
+            disappear_after: Option<f64>) -> Food {
+        let block = Block::new(Position::new(0, 0), shape);
+        Food {
+            block,
+            calories,
+            disappear_after,
+        }
+    }
+
+    pub fn default_food() -> Food {
         let shape = Shape::Image(String::from(FROG_IMAGE));
-        Food {
-            block: Block::new(position, shape),
-            color: FROG_COLOR,
-            calories: 2,
-            disappear_after: None,
-        }
+        Food::new(shape, 2, None)
     }
 
-    pub fn new_bonus(position: Position) -> Food {
+    pub fn default_bonus() -> Food {
         let shape = Shape::Image(String::from(BONUS_IMAGE));
-        Food {
-            block: Block::new(position, shape),
-            color: BONUS_COLOR,
-            calories: 10,
-            disappear_after: Some(BONUS_DISAPPEAR_TIME),
-        }
+        Food::new(shape, 10, Some(BONUS_DISAPPEAR_TIME))
     }
 
-    pub fn draw(&self, factory: &mut GfxFactory, context: &Context, graphics: &mut G2d) {
-        self.block.draw(self.color, factory, context, graphics);
+    pub fn draw(&self, factory: &mut GfxFactory,
+            context: &Context, graphics: &mut G2d) {
+        self.block.draw(factory, context, graphics);
     }
 
     pub fn on_position(&self, position: &Position) -> bool {
@@ -50,6 +47,10 @@ impl Food {
 
     pub fn get_position(&self) -> &Position {
         self.block.get_position()
+    }
+
+    pub fn set_position(&mut self, position: Position) {
+        self.block.set_position(position);
     }
 
     pub fn get_calories(&self) -> u32 {

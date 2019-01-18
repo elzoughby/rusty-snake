@@ -6,53 +6,81 @@ use crate::draw::{Block, Shape, Position, Direction, draw_eyes};
 
 
 const SNAKE_COLOR: Color = [0.19, 0.19, 0.18, 1.0];
-const SNAKE_BODY_SHAPE: Shape = Shape::Square;
-const SNAKE_HEAD_SHAPE: Shape = Shape::Circle;
+const SNAKE_BODY_SHAPE: Shape = Shape::Square(SNAKE_COLOR);
+const SNAKE_HEAD_SHAPE: Shape = Shape::Circle(SNAKE_COLOR);
+const SNAKE_INIT_POSITION: Position = Position (5, 3);
+const SNAKE_INIT_DIRECTION: Direction = Direction::Right;
+const SNAKE_INIT_LENGTH: u8 = 2;
 
 
 pub struct Snake {
     head: Block,
+    body_shape: Shape,
     body: LinkedList<Block>,
-    prev_tail: Position,
     direction: Direction,
-    color: Color,
+    init_position: Position,
+    init_direction: Direction,
+    prev_tail: Position,
     eatings: u32,
+}
+
+
+impl Default for Snake {
+
+    fn default() -> Snake {
+        let head = Block::new(SNAKE_INIT_POSITION, SNAKE_HEAD_SHAPE);
+        Snake::new(head, SNAKE_BODY_SHAPE, SNAKE_INIT_DIRECTION)
+    }
+
 }
 
 
 impl Snake {
 
-    pub fn new(position: &Position) -> Snake {
-        let mut body: LinkedList<Block> = LinkedList::new();
-        body.push_back(Block::new(
-            position.shifted_by(1, 0),
-            SNAKE_BODY_SHAPE,
-        ));
-
-        body.push_back(Block::new(
-            position.shifted_by(0, 0),
-            SNAKE_BODY_SHAPE,
-        ));
-
+    pub fn new(head: Block, body_shape: Shape, 
+            init_direction: Direction) -> Snake {
+        let init_position = head.get_position().clone();
+        let body: LinkedList<Block> = Snake::build_snake_body(
+            &body_shape,
+            &init_position,
+            &init_direction);
+        let tail_pos = body.back().unwrap().get_position().clone();
+        
         Snake {
-            head: Block::new( 
-                position.shifted_by(2, 0),
-                SNAKE_HEAD_SHAPE,
-            ),
-            body: body,
-            prev_tail: position.shifted_by(1, 0),
-            direction: Direction::Right,
-            color: SNAKE_COLOR,
+            head,
+            body_shape,
+            body,
+            direction: init_direction.clone(),
+            init_direction,
+            init_position,
+            prev_tail: tail_pos,
             eatings: 0,
         }
+    }
+
+    fn build_snake_body(body_shape: &Shape, init_position: &Position,
+            init_direction: &Direction) -> LinkedList<Block> {
+        let mut body: LinkedList<Block> = LinkedList::new();
+        let mut pos = init_position.clone();
+        for _ in 0..SNAKE_INIT_LENGTH {
+            pos = match init_direction {
+                Direction::Up => pos.shifted_by(0, 1),
+                Direction::Down => pos.shifted_by(0, -1),
+                Direction::Left => pos.shifted_by(1, 0),
+                Direction::Right => pos.shifted_by(-1, 0),
+            };
+            let body_block = Block::new(pos.clone(), body_shape.clone());
+            body.push_back(body_block);
+        }
+        body
     }
 
     pub fn draw(&self, factory: &mut GfxFactory, context: &Context, 
                 graphics: &mut G2d) {
         for block in self.body.iter() {
-            block.draw(SNAKE_COLOR, factory, context, graphics);
+            block.draw(factory, context, graphics);
         }
-        self.head.draw(SNAKE_COLOR, factory, context, graphics);
+        self.head.draw(factory, context, graphics);
         draw_eyes(&self.head, &self.direction, context, graphics);
     }
 
@@ -77,9 +105,26 @@ impl Snake {
 
     pub fn eat(&mut self) {
         let tail_pos = self.prev_tail.clone();
-        let new_block = Block::new(tail_pos, SNAKE_BODY_SHAPE);
+        let body_shape = self.body_shape.clone();
+        let new_block = Block::new(tail_pos, body_shape);
         self.body.push_back(new_block);
         self.eatings += 1;
+    }
+
+    pub fn reset(&mut self) {
+        self.head.set_position(self.init_position.clone());
+        self.body = Snake::build_snake_body(
+            &self.body_shape,
+            &self.init_position,
+            &self.init_direction);
+        self.direction = self.init_direction.clone();
+        self.prev_tail = self.body.back().unwrap()
+                .get_position().clone();
+        self.eatings = 0;
+    }
+
+    pub fn worth_bonus(&self) -> bool {
+        self.eatings != 0 && self.eatings%5 == 0
     }
 
     pub fn bite_itself(&self) -> bool {
@@ -120,11 +165,6 @@ impl Snake {
 
     pub fn get_direction(&self) -> &Direction {
         &self.direction
-    }
-
-    #[allow(dead_code)]
-    pub fn set_color(&mut self, color: Color) {
-        self.color = color;
     }
 
     pub fn get_eatings(&self) -> u32 {

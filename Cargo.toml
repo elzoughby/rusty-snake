@@ -1,5 +1,5 @@
 [package]
-name = "rusty_snake"
+name = "snake"
 description = "The classic snake game written in rust"
 version = "0.1.0"
 authors = ["Ahmed Elzoughby <gs_elzoughby@yahoo.com>"]
@@ -8,12 +8,19 @@ license = "Apache-2.0/MIT"
 readme = "README.md"
 categories = ["Games"]
 keywords = ["rust", "snake", "game", "piston"]
-homepage = "https://github.com/elzoughby/rusty-snake"
-repository = "https://github.com/elzoughby/rusty-snake.git"
+homepage = "https://github.com/elzoughby/snake"
+repository = "https://github.com/elzoughby/snake.git"
 exclude = ["assets/*"]
 
+[lib]
+name = "snake"
+path = "src/lib.rs"
+
+[[bin]]
+name = "snake"
+path = "src/main.rs"
 
 [dependencies]
 rand = "0.6.4"
 find_folder = "0.3.0"
-piston_window = "0.85.0"
+piston_window = "0.86.0"

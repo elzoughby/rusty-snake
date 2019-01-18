@@ -3,6 +3,8 @@ use piston_window::types::Color;
 use crate::draw::{Position, draw_rectangle};
 
 
+const PLAYGROUND_WIDTH: u32 = 35;
+const PLAYGROUND_HEIGHT: u32 = 25;
 const PLAYGROUND_COLOR: Color = [0.66, 0.78, 0.22, 1.0];
 const BORDER_COLOR: Color = [0.80, 0.30, 0.30, 1.0];
 const BORDER_WIDTH: u32 = 1;
@@ -17,19 +19,25 @@ pub struct Playground {
 }
 
 
-impl Playground {
+impl Default for Playground {
 
-    pub fn new(width: u32, height: u32) -> Playground {
-        Playground::with_more_details(
-            width, 
-            height, 
+    fn default() -> Playground {
+        Playground::new(
+            PLAYGROUND_WIDTH, 
+            PLAYGROUND_HEIGHT, 
             PLAYGROUND_COLOR, 
             BORDER_COLOR,
             BORDER_WIDTH)
     }
 
-    pub fn with_more_details(width: u32, height: u32, color: Color,
-            border_color: Color, border_width: u32) -> Playground {
+}
+
+
+impl Playground {
+
+    pub fn new(width: u32, height: u32, color: Color,
+            border_color: Color, border_width: u32)
+            -> Playground {
         Playground {
             width,
             height,
@@ -39,7 +47,8 @@ impl Playground {
         }
     }
 
-    pub fn draw(&self, _factory: &mut GfxFactory, context: &Context, graphics: &mut G2d) {
+    pub fn draw(&self, _factory: &mut GfxFactory,
+            context: &Context, graphics: &mut G2d) {
         draw_rectangle(
             &Position (0, 0), 
             self.width, 
